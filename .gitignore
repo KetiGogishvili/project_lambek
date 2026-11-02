@@ -1,0 +1,9 @@
+*.hi
+*.o
+dist-newstyle/
+.stack-work/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store

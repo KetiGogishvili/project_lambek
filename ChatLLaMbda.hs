@@ -4,9 +4,23 @@ import Control.Exception
 
 import LTypes
 import qualified Lambek
+import LExp
 
 import Parser
 import PySupport
+
+-- added functions --
+
+-- output derivations
+showDerivations :: Lexicon sem -> [String] -> IO ()
+showDerivations lex ws =
+  case Lambek.derivations lex ws of
+    [] -> putStrLn "The sentence is not well-formed"
+    ds -> do
+      putStrLn "I can derive your sentence as follows:"
+      mapM_ (\d -> putStrLn ("   " ++ prettyLExp d)) ds
+ 
+-- end of added functions --
 
 -- "standardize" the capitalization of a word by making the first
 -- letter uppercase and the following letters lowercase.
@@ -22,10 +36,17 @@ repl elx phandle = do
   line <- getLine
   -- split it up into "standardized" words
   let ws = map stdize $ words line
-  -- test if the string of words is a grammatical sentence according to the lexicon
+ {-
+ -- version 1 --
+ -- test if the string of words is a grammatical sentence according to the lexicon
   if Lambek.isGrammatical elx ws
     then putStrLn "That is a well-formed sentence!"
     else putStrLn "That is not a well-formed sentence"
+ -}
+  -- version 2
+  -- show all possible derivations
+  showDerivations elx ws
+   
   -- repeat
   repl elx phandle
       

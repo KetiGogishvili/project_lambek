@@ -72,7 +72,7 @@ derivationsWith :: Lexicon sem -> [String] -> [(LExp, [(Var, sem)])]
 derivationsWith lex ws =
   [ (e, [ (v, s) | (v, _, s) <- named ])
   | choice <- sequence (map (entriesFor lex) ws),              -- list of all possible [(word, type, sem]) 
-    let named = numbered 1 choice,                             -- list of [(numbered_var, type, sem])
+    let named = numbered 0 choice,                             -- list of [(numbered_var, type, sem])
     e <- der_rinv [ (v, t) | (v, t, _) <- named ] (stp lex) ]  -- possible derivations
 
 -- Just the lambda terms.

@@ -1,4 +1,5 @@
 import Data.Char
+import Data.List (intercalate) 
 import System.IO
 import Control.Exception
 
@@ -19,7 +20,43 @@ showDerivations lex ws =
     ds -> do
       putStrLn "I can derive your sentence as follows:"
       mapM_ (\d -> putStrLn ("   " ++ prettyLExp d)) ds
- 
+      
+ -- translate a lambda term into a one-line Python expression
+toPython :: LExp -> String
+toPython (V x)   = x
+toPython (A f a) = "(" ++ toPython f ++ ")(" ++ toPython a ++ ")"
+toPython (L x e) = "(lambda " ++ x ++ ": " ++ toPython e ++ ")"
+
+-- meaning of a binding in parenthesis
+meaningString :: (Var, PythonCode) -> String
+meaningString (_, s) = "(" ++ text s ++ ")"
+
+-- the Python code for one derivation
+pythonFor :: LExp -> [(Var, PythonCode)] -> PythonCode
+pythonFor e binds =
+  PCode ("(lambda " ++ intercalate ", " (map fst binds) ++ ": " ++ toPython e ++ ")("
+         ++ intercalate ", " (map meaningString binds) ++ ")")
+
+-- evaluate each reading with Python and print one "Sense" line per reading
+printReadings :: PythonHandle -> [(LExp, [(Var, PythonCode)])] -> IO ()
+printReadings _  []                    = return ()
+printReadings ph ((e, binds) : rest) = do
+  r <- runPythonCode ph (pythonFor e binds)
+  putStrLn ("Sense [" ++ prettyLExp e ++ "]: " ++ r)
+  printReadings ph rest
+  
+ -- derive, evaluate and report the sentence
+answer :: Lexicon PythonCode -> PythonHandle -> [String] -> IO ()
+answer lex ph ws =
+  case Lambek.derivationsWith lex ws of
+    [] -> putStrLn "That is not a well-formed sentence"
+    [(e, binds)] -> do
+      r <- runPythonCode ph (pythonFor e binds)
+      putStrLn r
+    readings -> do
+      putStrLn "That sentence is ambiguous"
+      printReadings ph readings
+   
 -- end of added functions --
 
 -- "standardize" the capitalization of a word by making the first
@@ -43,10 +80,13 @@ repl elx phandle = do
     then putStrLn "That is a well-formed sentence!"
     else putStrLn "That is not a well-formed sentence"
  -}
+ {-
   -- version 2
   -- show all possible derivations
   showDerivations elx ws
-   
+ -}
+  -- version 3
+  answer elx phandle ws 
   -- repeat
   repl elx phandle
       

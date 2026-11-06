@@ -12,7 +12,7 @@ Student   : n                    = lambda x : kind[x] == 'student'.
 Professor : n                    = lambda x : kind[x] == 'professor'.
 
 Works    : np \ s               = lambda x : x in work.
-Teaches   : np \ (s / np)        = lambda x : lambda y : (x,y) in teach.
+Instructs   : np \ (s / np)        = lambda x : lambda y : (x,y) in instruct.
 Helps     : np \ (s / np)        = lambda x : lambda y : (x,y) in assist.
 
 Is        : np \ (s / adj)       = lambda x : lambda p : p(x).
@@ -34,5 +34,5 @@ And       : adj \ (adj / adj)    = lambda p : lambda q : lambda x : p(x) and q(x
 Who       : q / (np \ s)         = lambda p : [x for x in people if p(x)].
 Who       : q / (s / np)         = lambda p : [x for x in people if p(x)].
 Does      : (s / np) / (s / np)  = lambda p : p.
-Teach     : np \ (s / np)        = lambda x : lambda y : (x,y) in teach.
+Instruct     : np \ (s / np)        = lambda x : lambda y : (x,y) in instruct.
 Help      : np \ (s / np)        = lambda x : lambda y : (x,y) in assist.

@@ -20,19 +20,19 @@ Example session (school world):
 ```
 > Alperen works
 True
-> every professor teaches a student
+> every professor instructs a student
 That sentence is ambiguous
-Sense [Every_1 Professor_2 (\a. A_4 Student_5 (\b. Teaches_3 a b))]: True
-Sense [A_4 Student_5 (\a. Every_1 Professor_2 (\b. Teaches_3 b a))]: False
-> Who teaches Ketevan?
+Sense [Every_1 Professor_2 (\a. A_4 Student_5 (\b. Instructs_3 a b))]: True
+Sense [A_4 Student_5 (\a. Every_1 Professor_2 (\b. Instructs_3 b a))]: False
+> Who instructs Ketevan?
 Noam, Sebastien
-> Who does Noam teach?
+> Who does Noam instruct?
 Ketevan, Alperen, Matheus
 > Who flies?
 That is not a well-formed sentence
 ```
 
-The two readings of the ambiguous sentence differ in which quantifier has wide scope. Each professor teaches some student (true), but no single student is taught by every professor (false).
+The two readings of the ambiguous sentence differ in which quantifier has wide scope. Each professor instructs some student (true), but no single student is instructed by every professor (false).
 
 ## Files
 
@@ -74,11 +74,11 @@ The sequent calculus rules R, R′, F, L, L′ and X are implemented by two mutu
 
 ## Extension 1: a second domain
 
-`school.elx` and `schoolworld.py` describe three students and three professors, with the verbs *works* and *teaches* (and *helps*), the adjectives *tired* and *clever*, and the quantifiers *someone*, *every* and *a*. They use the same types as `animals.elx` and run on the unchanged engine, which shows that the engine does not depend on the domain.
+`school.elx` and `schoolworld.py` describe three students and three professors, with the verbs *works* and *instructs* (and *helps*), the adjectives *tired* and *clever*, and the quantifiers *someone*, *every* and *a*. They use the same types as `animals.elx` and run on the unchanged engine, which shows that the engine does not depend on the domain.
 
 ## Extension 2: questions
 
-The interface now also answers "Who" questions: "Who is clever?", "Who teaches Ketevan?" (subject questions), and "Who does Noam teach?" (object question).
+The interface now also answers "Who" questions: "Who is clever?", "Who instructs Ketevan?" (subject questions), and "Who does Noam instruct?" (object question).
 
 **Design.** A question is not true or false, so it gets its own atomic type `q`. The Lambek algorithm is unchanged. `answer` first tries to derive the sentence type `s`, and if there is no derivation, `answerQuestion` asks again with the goal type `q` (`lex { stp = Atm "q" }`).
 
@@ -88,14 +88,14 @@ The interface now also answers "Who" questions: "Who is clever?", "Who teaches K
 Who   : q / (np \ s)         = lambda p : [x for x in people if p(x)].
 Who   : q / (s / np)         = lambda p : [x for x in people if p(x)].
 Does  : (s / np) / (s / np)  = lambda p : p.
-Teach : np \ (s / np)        = lambda x : lambda y : (x,y) in teach.
+Instruct  : np \ (s / np)        = lambda x : lambda y : (x,y) in instruct.
 Help  : np \ (s / np)        = lambda x : lambda y : (x,y) in assist.
 ```
 
 - For a subject question ("Who sleeps?"), the verb phrase `np \ s` follows "Who", so `Who : q / (np \ s)`.
 - For an object question ("Who does Conor fear?"), the part after "Who" is a sentence missing its object, which has type `s / np`, so `Who : q / (s / np)`.
 - "Does" only makes the English grammatical. Its type `(s / np) / (s / np)` lets "does Conor fear" count as an `s / np`, and its meaning is the identity.
-- `Teach` and `Help` are the base forms of the verbs, needed after "does".
+- `Instruct` and `Help` are the base forms of the verbs, needed after "does".
 - The meaning of `Who` is a list of answers. `pythonForQuestion` prints it as `a, b, c`, or `nobody` when the list is empty.
 
 `removePunctuation` strips `? ! . ,` from the input so that "hungry?" matches the lexicon.
@@ -117,7 +117,7 @@ Help  : np \ (s / np)        = lambda x : lambda y : (x,y) in assist.
 
 ## AI-use acknowledgement
 
-I used Claude AI while working on this project for looking up various built-in functions, debugging, testing and creating this README file. 
+I used Claude AI while working on this project for looking up various built-in functions, debugging, testing and creating this README file.
 
 ## References
 

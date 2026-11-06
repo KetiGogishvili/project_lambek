@@ -24,8 +24,8 @@ dec_rinv gamma (DivR b a) = dec_rinv (gamma ++ [a]) b -- rule R'
 dec_lfoc :: [LTp] -> LTp -> [LTp] -> Atm -> Bool
 dec_lfoc [] (Atm p) [] q = p == q -- rule X
 dec_lfoc _ (Atm _) _ _ = False
-dec_lfoc gammaL (DivL a b) gammaR p = anyTrue [ (dec_rinv gammaL2 a) && (dec_lfoc gammaL1 b gammaR p) | (gammaL1, gammaL2) <- split gammaL, not (null gammaL2) ] -- rule L'
-dec_lfoc gammaL (DivR b a) gammaR p = anyTrue [ (dec_rinv gammaR1 a) && (dec_lfoc gammaL b gammaR2 p) | (gammaR1, gammaR2) <- split gammaR, not (null gammaR1) ] -- rule L
+dec_lfoc gammaL (DivL a b) gammaR p = anyTrue [ (dec_rinv gammaL2 a) && (dec_lfoc gammaL1 b gammaR p) | (gammaL1, gammaL2) <- split gammaL ] -- rule L'
+dec_lfoc gammaL (DivR b a) gammaR p = anyTrue [ (dec_rinv gammaR1 a) && (dec_lfoc gammaL b gammaR2 p) | (gammaR1, gammaR2) <- split gammaR ] -- rule L
 
 -- extracts all possible type lists for a sentence
 types :: Lexicon sem -> [String] -> [[LTp]]
@@ -42,8 +42,8 @@ freshVar gamma = fresh [ V v | (v,_) <- gamma ]
 
 der_rinv :: [(Var,LTp)] -> LTp -> [LExp]
 der_rinv gamma (Atm p) = [foldl A (V x) es | (gammaL, (x, t) : gammaR) <- split gamma, es <- der_lfoc gammaL t gammaR p] -- rule F
-der_rinv gamma (DivL a b) = [L x e | let x = (freshVar gamma), e <- der_rinv ((x, a) : gamma) b]
-der_rinv gamma (DivR b a) = [L x e | let x = (freshVar gamma), e <- der_rinv (gamma ++ [(x, a)]) b]
+der_rinv gamma (DivL a b) = [L x e | let x = (freshVar gamma), e <- der_rinv ((x, a) : gamma) b] -- rule R
+der_rinv gamma (DivR b a) = [L x e | let x = (freshVar gamma), e <- der_rinv (gamma ++ [(x, a)]) b] -- rule R'
 
 der_lfoc :: [(Var,LTp)] -> LTp -> [(Var,LTp)] -> Atm -> [[LExp]]
 der_lfoc [] (Atm p) [] q                     -- rule X

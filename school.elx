@@ -1,0 +1,32 @@
+SENTENCE : s.
+
+Ketevan       : np                   = 'Ketevan'.
+Alperen       : np                   = 'Alperen'.
+Matheus     : np                   = 'Matheus'.
+Noam       : np                   = 'Noam'.
+Lydia      : np                   = 'Lydia'.
+Sebastien     : np                   = 'Sebastien'.
+
+Person    : n                    = lambda x : x in people.
+Student   : n                    = lambda x : kind[x] == 'student'.
+Professor : n                    = lambda x : kind[x] == 'professor'.
+
+Works    : np \ s               = lambda x : x in work.
+Teaches   : np \ (s / np)        = lambda x : lambda y : (x,y) in teach.
+Helps     : np \ (s / np)        = lambda x : lambda y : (x,y) in assist.
+
+Is        : np \ (s / adj)       = lambda x : lambda p : p(x).
+Tired     : adj                  = lambda x : x in tired.
+Tired     : n / n                = lambda p : lambda x : p(x) and x in tired.
+Clever    : adj                  = lambda x : x in clever.
+Clever    : n / n                = lambda p : lambda x : p(x) and x in clever.
+
+Someone   : s / (np \ s)         = lambda p : any (p(x) for x in people).
+Someone   : (s / np) \ s         = lambda p : any (p(x) for x in people).
+Every     : (s / (np \ s)) / n   = lambda q : lambda p : all (p(x) for x in people if q(x)).
+Every     : ((s / np) \ s) / n   = lambda q : lambda p : all (p(x) for x in people if q(x)).
+A         : (s / (np \ s)) / n   = lambda q : lambda p : any (p(x) and q(x) for x in people).
+A         : ((s / np) \ s) / n   = lambda q : lambda p : any (p(x) and q(x) for x in people).
+
+And       : s \ (s / s)          = lambda x : lambda y : x and y.
+And       : adj \ (adj / adj)    = lambda p : lambda q : lambda x : p(x) and q(x).

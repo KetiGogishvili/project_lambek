@@ -24,7 +24,7 @@ showDerivations lex ws =
  -- translate a lambda term into a one-line Python expression
 toPython :: LExp -> String
 toPython (V x)   = x
-toPython (A f a) = "(" ++ toPython f ++ ")(" ++ toPython a ++ ")"
+toPython (A f a) = toPython f ++ "(" ++ toPython a ++ ")"
 toPython (L x e) = "(lambda " ++ x ++ ": " ++ toPython e ++ ")"
 
 -- meaning of a binding in parenthesis

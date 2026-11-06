@@ -49,7 +49,7 @@ printReadings ph ((e, binds) : rest) = do
 answer :: Lexicon PythonCode -> PythonHandle -> [String] -> IO ()
 answer lex ph ws =
   case Lambek.derivationsWith lex ws of
-    [] -> putStrLn "That is not a well-formed sentence"
+    [] -> answerQuestion lex ph ws
     [(e, binds)] -> do
       r <- runPythonCode ph (pythonFor e binds)
       putStrLn r
@@ -58,6 +58,41 @@ answer lex ph ws =
       printReadings ph readings
    
 -- end of added functions --
+
+-- OPTIONAL - add question words
+
+-- the Python code for one derivation of a question
+-- the meaning of a question is a list of answers, printed as "a, b, c"
+pythonForQuestion :: LExp -> [(Var, PythonCode)] -> PythonCode
+pythonForQuestion e binds =
+  PCode ("print(', '.join(" ++ text (pythonFor e binds) ++ ") or 'nobody')")
+
+-- evaluate each reading of a question and print one "Sense" line per reading
+printQuestionReadings :: PythonHandle -> [(LExp, [(Var, PythonCode)])] -> IO ()
+printQuestionReadings _  []                    = return ()
+printQuestionReadings ph ((e, binds) : rest) = do
+  r <- runPythonCode ph (pythonForQuestion e binds)
+  putStrLn ("Sense [" ++ prettyLExp e ++ "]: " ++ r)
+  printQuestionReadings ph rest
+
+-- derive, evaluate and report a question
+-- the goal type is q instead of the sentence type s
+answerQuestion :: Lexicon PythonCode -> PythonHandle -> [String] -> IO ()
+answerQuestion lex ph ws =
+  case Lambek.derivationsWith (lex { stp = Atm "q" }) ws of
+    [] -> putStrLn "That is not a well-formed sentence"
+    [(e, binds)] -> do
+      r <- runPythonCode ph (pythonForQuestion e binds)
+      putStrLn r
+    readings -> do
+      putStrLn "That sentence is ambiguous"
+      printQuestionReadings ph readings
+
+-- remove punctuation so that "Who is hungry?" works
+removePunctuation :: String -> String
+removePunctuation = filter (`notElem` "?!.,")
+
+-- end of question word implementation
 
 -- "standardize" the capitalization of a word by making the first
 -- letter uppercase and the following letters lowercase.
@@ -72,7 +107,7 @@ repl elx phandle = do
   -- get a line of input
   line <- getLine
   -- split it up into "standardized" words
-  let ws = map stdize $ words line
+  let ws = map stdize $ words (removePunctuation line)
  {-
  -- version 1 --
  -- test if the string of words is a grammatical sentence according to the lexicon
